@@ -44,7 +44,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'playgrounds.apps.PlaygroundsConfig',
+    # Local
+    'playgrounds',
+    'store',
+    'tags',
+    # 3rd Party
     'debug_toolbar',
 ]
 
