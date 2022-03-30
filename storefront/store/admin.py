@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Count, QuerySet
 
 from . import models
@@ -7,6 +7,7 @@ from . import models
 @admin.register(models.Collection)
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['title', 'product_counts']
+    search_fields = ['title']
 
     def product_counts(self, collection):
         return collection.product_counts
@@ -36,6 +37,11 @@ class InventoryFilter(admin.SimpleListFilter):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
+    prepopulated_fields = {
+        'slug': ('title',)
+    }
+    autocomplete_fields = ['collection']
+    actions = ['clear_inventory']
     list_display = ['title', 'unit_price', 'inventory_status', 'collection_title']
     list_editable = ['unit_price']
     list_filter = ['collection', 'last_update', InventoryFilter]
@@ -52,6 +58,15 @@ class ProductAdmin(admin.ModelAdmin):
         else:
             return 'OK'
 
+    @admin.action(description='Clear Inventory')
+    def clear_inventory(self, request, queryset):
+        updated_count = queryset.update(inventory=0)
+        self.message_user(
+            request,
+            f'{updated_count} Products were updated successfully.',
+            messages.SUCCESS,
+        )
+
 
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -64,6 +79,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['customer']
     list_display = ['id', 'placed_at', 'payment_status', 'customer']
     ordering = ['id', 'placed_at']
     list_per_page = 10
