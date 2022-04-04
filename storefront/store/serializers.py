@@ -21,14 +21,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax', read_only=True)
 
-    # collection = CollectionSerializer()
-
     def calculate_tax(self, product: Product):
         return product.unit_price * Decimal(1.1)
-
-    # def create(self, validated_data):
-    #     print(validated_data)
-    #     return super().save()
 
 
 class ReviewSerializer(serializers.ModelSerializer):

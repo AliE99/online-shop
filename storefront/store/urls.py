@@ -9,7 +9,7 @@ from .views import ProductViewSet, CollectionViewSet, ReviewViewSet
 # urlpatterns = router.urls
 
 router = routers.DefaultRouter()
-router.register('products', ProductViewSet)
+router.register('products', ProductViewSet, basename='products')
 router.register('collections', CollectionViewSet)
 
 products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')
