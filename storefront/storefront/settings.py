@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 from django.contrib.messages import constants as messages
 import environ
@@ -155,6 +156,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }
 
 AUTH_USER_MODEL = 'core.User'
