@@ -12,6 +12,7 @@ from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializ
     AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
 from .filters import ProductFilter
 from .pagination import DefaultPagination
+from .permissions import IsAdminOrReadOnly
 
 
 class ProductViewSet(ModelViewSet):
@@ -22,6 +23,7 @@ class ProductViewSet(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ['title', 'description']
     ordering_fields = ['unit_price', 'last_update']
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -38,6 +40,7 @@ class ProductViewSet(ModelViewSet):
 class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.prefetch_related('product_set').all()
     serializer_class = CollectionSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def delete(self, request, pk):
         collection = get_object_or_404(Collection, pk=pk)
@@ -84,7 +87,7 @@ class CartItemViewSet(ModelViewSet):
         return {'cart_id': self.kwargs['cart_pk']}
 
 
-class CustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     permission_classes = [IsAuthenticated]
@@ -94,7 +97,7 @@ class CustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, Ge
             return [AllowAny()]
         return [IsAuthenticated()]
 
-    @action(detail=False, methods=['GET', 'PUT'])
+    @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
         (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
         if request.method == 'GET':
