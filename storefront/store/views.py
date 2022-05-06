@@ -113,6 +113,13 @@ class CustomerViewSet(ModelViewSet):
 class OrderViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        serializer = CreateOrderSerializer(data=request.data, context={'user_id': self.request.user.id})
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)
+
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
@@ -126,6 +133,3 @@ class OrderViewSet(ModelViewSet):
             return CreateOrderSerializer
 
         return OrderSerializer
-
-    def get_serializer_context(self):
-        return {'user_id': self.request.user.id}
