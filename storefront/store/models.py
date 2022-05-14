@@ -13,9 +13,9 @@ class Promotion(models.Model):
 class Collection(models.Model):
     title = models.CharField(max_length=255)
     featured_product = models.ForeignKey(
-        'Product', on_delete=models.SET_NULL, null=True, related_name='+')
+        'Product', on_delete=models.SET_NULL, null=True, related_name='+', blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
     class Meta:
@@ -26,15 +26,17 @@ class Product(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField()
     description = models.TextField(null=True, blank=True)
-    unit_price = models.DecimalField(max_digits=6,
-                                     decimal_places=2,
-                                     validators=[MinValueValidator(1)])
+    unit_price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(1)])
     inventory = models.IntegerField(validators=[MinValueValidator(0)])
     last_update = models.DateTimeField(auto_now=True)
-    collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
+    collection = models.ForeignKey(
+        Collection, on_delete=models.PROTECT, related_name='products')
     promotions = models.ManyToManyField(Promotion, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
     class Meta:
@@ -52,10 +54,11 @@ class Customer(models.Model):
         (MEMBERSHIP_GOLD, 'Gold'),
     ]
     phone = models.CharField(max_length=255)
-    birth_date = models.DateField(null=True)
+    birth_date = models.DateField(null=True, blank=True)
     membership = models.CharField(
         max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
@@ -70,6 +73,9 @@ class Customer(models.Model):
 
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
+        permissions = [
+            ('view_history', 'Can view history')
+        ]
 
 
 class Order(models.Model):
@@ -89,13 +95,14 @@ class Order(models.Model):
 
     class Meta:
         permissions = [
-            ('cancel_order', 'Can cancel the order')
+            ('cancel_order', 'Can cancel order')
         ]
 
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name='orderitems')
     quantity = models.PositiveSmallIntegerField()
     unit_price = models.DecimalField(max_digits=6, decimal_places=2)
 
@@ -113,10 +120,11 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator]
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
@@ -124,7 +132,8 @@ class CartItem(models.Model):
 
 
 class Review(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='reviews')
     name = models.CharField(max_length=255)
     description = models.TextField()
     date = models.DateField(auto_now_add=True)

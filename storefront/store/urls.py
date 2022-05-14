@@ -1,25 +1,22 @@
-from django.urls import path, include
+from django.urls import path
+from django.urls.conf import include
 from rest_framework_nested import routers
-from rest_framework.routers import DefaultRouter
-from .views import ProductViewSet, CollectionViewSet, ReviewViewSet, CartViewSet, CartItemViewSet, CustomerViewSet, \
-    OrderViewSet
-
-# router = DefaultRouter()
-# router.register('reviews', ReviewViewSet)
-#
-# urlpatterns = router.urls
+from . import views
 
 router = routers.DefaultRouter()
-router.register('products', ProductViewSet, basename='products')
-router.register('collections', CollectionViewSet)
-router.register('carts', CartViewSet)
-router.register('customers', CustomerViewSet)
-router.register('orders', OrderViewSet, basename='orders')
+router.register('products', views.ProductViewSet, basename='products')
+router.register('collections', views.CollectionViewSet)
+router.register('carts', views.CartViewSet)
+router.register('customers', views.CustomerViewSet)
+router.register('orders', views.OrderViewSet, basename='orders')
 
-products_router = routers.NestedDefaultRouter(router, 'products', lookup='product')
-products_router.register('reviews', ReviewViewSet, basename='product-reviews')
+products_router = routers.NestedDefaultRouter(
+    router, 'products', lookup='product')
+products_router.register('reviews', views.ReviewViewSet,
+                         basename='product-reviews')
 
 carts_router = routers.NestedDefaultRouter(router, 'carts', lookup='cart')
-carts_router.register('items', CartItemViewSet, basename='cart-items')
+carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 
+# URLConf
 urlpatterns = router.urls + products_router.urls + carts_router.urls
