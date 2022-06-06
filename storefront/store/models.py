@@ -1,3 +1,4 @@
+from email.mime import image
 from django.contrib import admin
 from django.conf import settings
 from django.core.validators import MinValueValidator
@@ -48,6 +49,13 @@ class Product(models.Model):
         ordering = ["title"]
 
 
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to='store/images')
+
+
 class Customer(models.Model):
     MEMBERSHIP_BRONZE = "B"
     MEMBERSHIP_SILVER = "S"
@@ -79,7 +87,7 @@ class Customer(models.Model):
         return self.user.last_name
 
     class Meta:
-        ordering = ["user__first_name", "user__last_name"] 
+        ordering = ["user__first_name", "user__last_name"]
         permissions = [("view_history", "Can View History")]
 
 
