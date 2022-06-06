@@ -5,6 +5,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from uuid import uuid4
 
+from store.validators import validate_file_size
+
 
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
@@ -53,7 +55,10 @@ class ProductImage(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="images"
     )
-    image = models.ImageField(upload_to='store/images')
+    image = models.ImageField(
+        upload_to="store/images",
+        validators=[validate_file_size],
+    )
 
 
 class Customer(models.Model):
